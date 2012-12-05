@@ -3,8 +3,8 @@ use warnings;
 use strict;
 
 @ARGV==1 or die("erreur argument");
-if($ARGV[1]=="start") {system("./lib/siouxstart");}
-if($ARGV[1]=="stop") {system("./lib/siouxstop");}
-if($ARGV[1]=="conf") {system("./lib/siouxconf");}
+if($ARGV[0] eq "start") {system("./lib/siouxstart");}
+if($ARGV[0] eq "stop") {system("./lib/siouxstop");}
+if($ARGV[0] eq "conf") {system("./lib/siouxconf");}
 
 die("erreur nom argument");
