@@ -6,6 +6,6 @@ use strict;
 @ARGV == 1 or die("Il faut un argument");
 if($ARGV[0] eq "start") {do "siouxstart"; exit 0}
 if($ARGV[0] eq "stop") {do "siouxstop"; exit 0}
-if($ARGV[0] eq "conf") {do "siouxconf"; exit 0}
+if($ARGV[0] eq "configure") {do "siouxconf"; exit 0}
 
 die("Cette argument n'existe pas");
