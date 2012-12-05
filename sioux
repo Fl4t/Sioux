@@ -1,10 +1,11 @@
 #!/usr/bin/perl
+use lib "lib";
 use warnings;
 use strict;
 
-@ARGV==1 or die("erreur argument");
-if($ARGV[0] eq "start") {system("./lib/siouxstart");}
-if($ARGV[0] eq "stop") {system("./lib/siouxstop");}
-if($ARGV[0] eq "conf") {system("./lib/siouxconf");}
+@ARGV == 1 or die("erreur argument");
+if($ARGV[0] eq "start") {do "siouxstart";}
+if($ARGV[0] eq "stop") {do "siouxstop";}
+if($ARGV[0] eq "conf") {do "siouxconf";}
 
 die("erreur nom argument");
