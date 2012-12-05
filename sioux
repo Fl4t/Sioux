@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 
 if(@ARGV==1) or die("erreur argument");
-if(@ARGV[1]=="start") {system("./lib/siouxstart");}
-if(@ARGV[1]=="stop") {system("./lib/siouxstop");}
-if(@ARGV[1]=="conf") {system("./lib/siouxconf");}
+if($ARGV[1]=="start") {system("./lib/siouxstart");}
+if($ARGV[1]=="stop") {system("./lib/siouxstop");}
+if($ARGV[1]=="conf") {system("./lib/siouxconf");}
+
 
 die("erreur nom argument");
