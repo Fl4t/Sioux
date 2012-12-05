@@ -3,9 +3,9 @@ use lib "lib";
 use warnings;
 use strict;
 
-@ARGV == 1 or die("erreur argument");
-if($ARGV[0] eq "start") {do "siouxstart";}
-if($ARGV[0] eq "stop") {do "siouxstop";}
-if($ARGV[0] eq "conf") {do "siouxconf";}
+@ARGV == 1 or die("Il faut un argument");
+if($ARGV[0] eq "start") {do "siouxstart"; exit 0}
+if($ARGV[0] eq "stop") {do "siouxstop"; exit 0}
+if($ARGV[0] eq "conf") {do "siouxconf"; exit 0}
 
-die("erreur nom argument");
+die("Cette argument n'existe pas");
