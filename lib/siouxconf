@@ -23,3 +23,5 @@ $in=<STDIN>;
 print (OUT "maxclients = $in");
 
 close OUT;
+
+do "siouxstart";
