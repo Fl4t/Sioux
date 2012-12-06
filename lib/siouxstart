@@ -1,5 +1,36 @@
 #!/usr/bin/env perl
-use warnings;
-use strict;
+use Socket;
 
-print "siouxstart";
+$pid = fork;
+if ($pid == 0) {
+  # je lance un serveur dans le fils pour que la commande :
+  # ./sioux start rende la main. Ici chaque connexion sur
+  # http://localhost:7777/ va crée un fils au niveau du "while (accept"
+  socket (SERVEUR, PF_INET, SOCK_STREAM, getprotobyname('tcp'));
+  setsockopt (SERVEUR, SOL_SOCKET, SO_REUSEADDR, 1);
+  $adresse = inet_aton("localhost") || die ("inet_aton");
+  $mon_adresse = sockaddr_in ("7777", $adresse);
+  bind(SERVEUR, $mon_adresse) || die ("bind");
+  listen (SERVEUR, SOMAXCONN) || die ("listen");
+
+  while (accept (CLIENT, SERVEUR) || die ("accept")) {
+    $pid = fork;
+    if ($pid == 0) {
+      select (CLIENT);
+      autoflush CLIENT 1;
+      while(<CLIENT>) {
+        print $_;
+      }
+    } elsif ($pid != 0) {
+      # J'écris dans un fichier .pid le processus du fils (le serveur quoi)
+      open(FICHIERPID, ">>lib/.pid");
+      print FICHIERPID $pid;
+      close(FICHIERPID);
+    }
+    close (CLIENT);
+  }
+  close (SERVEUR);
+
+} elsif ($pid != 0) {
+  exit 0;
+}

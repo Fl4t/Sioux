@@ -2,5 +2,8 @@
 use warnings;
 use strict;
 
-print "siouxstop";
-
+if (-e "../sioux.conf") {
+  print "le fichier existe";
+} else {
+  print "Je ne trouve pas le fichier";
+}
