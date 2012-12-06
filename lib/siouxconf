@@ -2,4 +2,24 @@
 use warnings;
 use strict;
 
-print "siouxconf";
+
+my $conf="../sioux.conf2";
+open OUT, ">$conf";
+
+print "port?";
+my $in=<STDIN>;
+print (OUT "port = $in");
+print "rootdir?";
+$in=<STDIN>;
+print (OUT "rootdir = $in");
+print "index?";
+$in=<STDIN>;
+print (OUT "index = $in");
+print "cgidir?";
+$in=<STDIN>;
+print (OUT "cgidir = $in");
+print "maxclients?";
+$in=<STDIN>;
+print (OUT "maxclients = $in");
+
+close OUT;
