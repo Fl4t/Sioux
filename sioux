@@ -7,17 +7,17 @@ use POSIX ":sys_wait_h";
 
 @ARGV == 1 or die("Il faut un argument");
 if($ARGV[0] eq "start") {
-	
-    $pid=fork(); 
+
+    $pid=fork();
     if($pid==0){
-    	exec "perl lib/siouxstart";
+    	do "siouxstart";
     }
     else{
     	open(FICHIERPID, ">>lib/.pid");
 		print FICHIERPID "$pid\n";
 		close(FICHIERPID);
     	waitpid(-1,WNOHANG);
-    } 
+    }
     exit 0;
 }
 if($ARGV[0] eq "stop") {
