@@ -31,4 +31,4 @@ if($ARGV[0] eq "configure") {
     exit 0;
 }
 
-die("Cette argument n'existe pas");
+die("Cet argument n'existe pas");
