@@ -1,6 +1,13 @@
 #!/usr/bin/env perl
 use Socket;
+use IO::Handle;
 
+open(CONF,"sioux.conf");
+while(<CONF>){
+    /(.*) = (.*)/;
+    $conf{$1}=$2;
+}
+close CONF;
 
 socket (SERVEUR, PF_INET, SOCK_STREAM, getprotobyname('tcp'));
 setsockopt (SERVEUR, SOL_SOCKET, SO_REUSEADDR, 1);
@@ -15,10 +22,45 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
 	chomp($req);
 	($methode,$ressource,$protocole)=split(/ /, $req);
 	chop($protocole);
-	print CLIENT "$methode $ressource $protocole";
 	print CLIENT "error GET\n" unless $methode eq "GET";
 	print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
 
+	$fichier = $conf{rootdir}.$ressource;
+	if ($ressource eq "/"){
+	    $entete="HTTP/1.0 200 OK\n Content-Type:html\n\n";
+	    print CLIENT $entete;
+	    opendir(DOSSIER,$fichier);
+	    @dos = readdir DOSSIER;
+	    foreach(@dos){
+		print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
+	    }
+	    close(DOSSIER);
+	    
+	}
+	else{
+	    if (-e $fichier) {
+		$ext=$fichier;
+		$ext=~s/(.*)\.(.*)$/$2/;
+		if($ext eq "txt"){
+		    $entete="HTTP/1.0 200 OK\n Content-Type:text\n\n"
+		}
+		else {
+		    if($ext eq "jpeg" || $ext eq "html"){
+			$entete="HTTP/1.0 200 OK\n Content-Type: image/jpeg\n\n";
+		    }
+		    else {
+			$entete="HTTP/1.0 200 OK\n Content-Type:html\n\n";
+		    }
+		}
+		print CLIENT $entete;
+		open(OUT,$fichier);
+		while(<OUT>){
+		    print CLIENT $_;
+		}
+	    }
+	}
+	
+	
     } elsif ($pid != 0) {
       Sioux::enregistrerPID($pid);
     }
