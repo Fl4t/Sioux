@@ -25,10 +25,7 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
 	print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
 	
     } elsif ($pid != 0) {
-# J'écris dans un fichier .pid le processus du fils (le serveur quoi)
-	open(FICHIERPID, ">>lib/.pid");
-	print FICHIERPID "$pid\n";
-	close(FICHIERPID);
+      Sioux::enregistrerPID($pid);
     }
     close (CLIENT);
 }

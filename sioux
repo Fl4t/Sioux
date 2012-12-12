@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use lib "lib";
 use POSIX ":sys_wait_h";
+use Sioux;
 
 
 
@@ -13,10 +14,7 @@ if($ARGV[0] eq "start") {
     	do "siouxstart";
     }
     else{
-    	open(FICHIERPID, ">>lib/.pid");
-		print FICHIERPID "$pid\n";
-		close(FICHIERPID);
-    	waitpid(-1,WNOHANG);
+      Sioux::enregistrerPID($pid);
     }
     exit 0;
 }
