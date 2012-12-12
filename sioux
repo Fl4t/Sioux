@@ -1,11 +1,30 @@
 #!/usr/bin/perl
 use lib "lib";
-use warnings;
-use strict;
+use POSIX ":sys_wait_h";
 
 @ARGV == 1 or die("Il faut un argument");
-if($ARGV[0] eq "start") {my $pid=fork; unless($pid){do "siouxstart"}; exit 0}
-if($ARGV[0] eq "stop") {my $pid=fork; unless($pid){do "siouxstop"}; exit 0}
-if($ARGV[0] eq "configure") {my $pid=fork; unless($pid){do "siouxconf"}; exit 0}
+if($ARGV[0] eq "start") {
+    my $pid=fork; 
+    if($pid==0){
+    	do "siouxstart";
+    }
+    else{
+    	open(FICHIERPID, ">>lib/.pid");
+		print FICHIERPID "$pid\n";
+		close(FICHIERPID);
+    	waitpid(-1,WNOHANG);
+    } 
+    exit 0;
+}
+if($ARGV[0] eq "stop") {
+    my $pid=fork;
+    unless($pid){do "siouxstop"};
+    exit 0;
+}
+if($ARGV[0] eq "configure") {
+    my $pid=fork;
+    unless($pid){do "siouxconf"};
+    exit 0;
+}
 
 die("Cette argument n'existe pas");
