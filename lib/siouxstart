@@ -17,13 +17,16 @@ listen (SERVEUR, SOMAXCONN) || die ("listen");
 while (accept (CLIENT, SERVEUR) || die ("accept")) {
     $pid = fork;
     if ($pid == 0) {
-	select (CLIENT);
-	autoflush CLIENT 1;
-	while(<CLIENT>) {
-	    print $_;
-	}
+	$req=<CLIENT>;
+	chomp($req);
+	($methode,$ressource,$protocole)=split(/ /, $req); 
+	chop($protocole);
+	print CLIENT "$methode $ressource $protocole";
+	print CLIENT "error GET\n" unless $methode eq "GET";
+	print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
+	
     } elsif ($pid != 0) {
-	# J'écris dans un fichier .pid le processus du fils (le serveur quoi)
+# J'écris dans un fichier .pid le processus du fils (le serveur quoi)
 	open(FICHIERPID, ">>lib/.pid");
 	print FICHIERPID "$pid\n";
 	close(FICHIERPID);

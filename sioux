@@ -2,11 +2,15 @@
 use lib "lib";
 use POSIX ":sys_wait_h";
 
+
+
+
 @ARGV == 1 or die("Il faut un argument");
 if($ARGV[0] eq "start") {
-    my $pid=fork; 
+	
+    $pid=fork(); 
     if($pid==0){
-    	do "siouxstart";
+    	exec "perl lib/siouxstart";
     }
     else{
     	open(FICHIERPID, ">>lib/.pid");
