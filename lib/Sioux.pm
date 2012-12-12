@@ -9,4 +9,14 @@ sub enregistrerPID {
   close(FICHIERPID);
 }
 
+sub chargerLaConf {
+  open(CONF, "sioux.conf");
+  while (<CONF>) {
+    chomp;
+    @conf = split(/ /, $_);
+    $ret[$i++] = $conf[$#conf];
+  }
+  return @ret;
+}
+
 1;
