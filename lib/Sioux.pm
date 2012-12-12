@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package subroutine;
+package Sioux;
 
 # J'écris dans un fichier .pid le processus d'un fils
 sub enregistrerPID {
