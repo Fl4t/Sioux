@@ -57,7 +57,7 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
 			$entete = "HTTP/1.0 200 OK\n Content-Type:text\n\n"
 		    }
 		    else {
-			if($ext eq "jpeg" || $ext eq "html"){
+			if($ext eq "jpeg"){
 			    $entete = "HTTP/1.0 200 OK\n Content-Type: image/jpeg\n\n";
 			}
 			else {
