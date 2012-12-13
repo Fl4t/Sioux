@@ -10,7 +10,7 @@ do {
   print "port ? : ";
   $port = <STDIN>;
   chomp($port);
-} until $port > 1024 && $port < 40_0000;
+} until $port > 1024 && $port <= 65_535;
 
 do {
   print "rootdir? : ";
