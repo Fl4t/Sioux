@@ -6,7 +6,6 @@ use POSIX ":sys_wait_h";
 use Sioux;
 
 
--e "sioux.conf" or die("Le fichier de configuration n'existe pas.");
 @ARGV == 1 or die("Il faut un argument");
 
 if ($ARGV[0] eq "start") {
@@ -14,6 +13,7 @@ if ($ARGV[0] eq "start") {
   my $pid = fork();
 
   if ($pid == 0) {
+    -e "sioux.conf" or die("Le fichier de configuration n'existe pas.");
     do "siouxstart";
   }
   else {
