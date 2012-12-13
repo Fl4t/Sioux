@@ -2,12 +2,8 @@
 use Socket;
 use IO::Handle;
 
-open(CONF,"sioux.conf");
-while(<CONF>){
-    /(.*) = (.*)/;
-    $conf{$1}=$2;
-}
-close CONF;
+($port, $rootdir, $index, $cgidir, $maxclients) = Sioux::chargerLaConf();
+
 
 socket (SERVEUR, PF_INET, SOCK_STREAM, getprotobyname('tcp'));
 setsockopt (SERVEUR, SOL_SOCKET, SO_REUSEADDR, 1);
@@ -25,42 +21,58 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
 	print CLIENT "error GET\n" unless $methode eq "GET";
 	print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
 
-	$fichier = $conf{rootdir}.$ressource;
+	$fichier = $rootdir.$ressource;
 	if ($ressource eq "/"){
-	    $entete="HTTP/1.0 200 OK\n Content-Type:html\n\n";
+	    $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
 	    print CLIENT $entete;
 	    opendir(DOSSIER,$fichier);
 	    @dos = readdir DOSSIER;
+	    @dos = sort @dos;
 	    foreach(@dos){
-		print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
+		unless ($_ eq "." || $_ eq ".."){
+		    print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
+		}
 	    }
 	    close(DOSSIER);
-	    
 	}
 	else{
-	    if (-e $fichier) {
-		$ext=$fichier;
-		$ext=~s/(.*)\.(.*)$/$2/;
-		if($ext eq "txt"){
-		    $entete="HTTP/1.0 200 OK\n Content-Type:text\n\n"
+	    if (-d $fichier) {
+		$entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+		print CLIENT $entete;
+		opendir(DOSSIER,$fichier);
+		@dos = readdir DOSSIER;
+		@dos = sort @dos;
+		foreach(@dos){
+		    unless ($_ eq "."){
+			print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
+		    }
 		}
-		else {
-		    if($ext eq "jpeg" || $ext eq "html"){
-			$entete="HTTP/1.0 200 OK\n Content-Type: image/jpeg\n\n";
+		close(DOSSIER);
+	    }
+	    else {
+		if (-e $fichier) {
+		    $ext = $fichier;
+		    $ext = ~s/(.*)\.(.*)$/$2/;
+		    if($ext eq "txt"){
+			$entete = "HTTP/1.0 200 OK\n Content-Type:text\n\n"
 		    }
 		    else {
-			$entete="HTTP/1.0 200 OK\n Content-Type:html\n\n";
+			if($ext eq "jpeg" || $ext eq "html"){
+			    $entete = "HTTP/1.0 200 OK\n Content-Type: image/jpeg\n\n";
+			}
+			else {
+			    $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+			}
 		    }
-		}
-		print CLIENT $entete;
-		open(OUT,$fichier);
-		while(<OUT>){
-		    print CLIENT $_;
+		    print CLIENT $entete;
+		    open(OUT,$fichier);
+		    while(<OUT>){
+			print CLIENT $_;
+		    }
 		}
 	    }
 	}
-	
-	
+	    
     } elsif ($pid != 0) {
       Sioux::enregistrerPID($pid);
     }
