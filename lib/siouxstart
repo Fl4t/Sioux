@@ -2,11 +2,6 @@
 use Socket;
 
 
-#$pid = fork;
-#if ($pid == 0) {
-# je lance un serveur dans le fils pour que la commande :
-# ./sioux start rende la main. Ici chaque connexion sur
-# http://localhost:7777/ va crée un fils au niveau du "while (accept"
 socket (SERVEUR, PF_INET, SOCK_STREAM, getprotobyname('tcp'));
 setsockopt (SERVEUR, SOL_SOCKET, SO_REUSEADDR, 1);
 $mon_adresse = sockaddr_in ("7777", INADDR_ANY);
@@ -18,19 +13,15 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
     if ($pid == 0) {
 	$req=<CLIENT>;
 	chomp($req);
-	($methode,$ressource,$protocole)=split(/ /, $req); 
+	($methode,$ressource,$protocole)=split(/ /, $req);
 	chop($protocole);
 	print CLIENT "$methode $ressource $protocole";
 	print CLIENT "error GET\n" unless $methode eq "GET";
 	print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
-	
+
     } elsif ($pid != 0) {
       Sioux::enregistrerPID($pid);
     }
     close (CLIENT);
 }
 close (SERVEUR);
-
-#} elsif ($pid != 0) {
-#  exit 0;
-#}
