@@ -21,18 +21,28 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
     print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
 
     $fichier = $rootdir.$ressource;
-    if ($ressource eq "/"){
+    if ($ressource =~ /\/$/){
       $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
       print CLIENT $entete;
-      opendir(DOSSIER,$index);
-      @dos = readdir DOSSIER;
-      @dos = sort @dos;
-      foreach(@dos){
-        unless ($_ eq "." || $_ eq ".."){
-          print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
-        }
+      if(-e $rootdir."/".$index){
+	  $pagedepart = $rootdir."/".$index;
+	  open(OUT,$pagedepart);
+	  while(<OUT>){
+	      print CLIENT $_;
+	  }
+	  close(OUT);
       }
-      close(DOSSIER);
+      else{
+	  $pagedepart = $fichier;
+	  open(DOSSIER,$pagedepart);
+	  @dos = readdir DOSSIER;
+	  @dos = sort @dos;
+	  foreach(@dos){
+	      unless ($_ eq "." || $_ eq ".."){
+		  print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
+	      }
+	  }
+      }
     }
     else {
       if ($ressource =~ /\.cgi/){
@@ -68,13 +78,13 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
         else {
           if (-e $fichier) {
             $ext = $fichier;
-            $ext = ~s/(.*)\.(.*)$/$2/;
+            $ext =~ s/(.*)\.(.*)$/$2/;
             if($ext eq "txt"){
               $entete = "HTTP/1.0 200 OK\n Content-Type:text\n\n"
             }
             else {
               if($ext eq "jpeg"){
-                $entete = "HTTP/1.0 200 OK\n Content-Type: image/jpeg\n\n";
+                $entete = "HTTP/1.0 200 OK\n Content-Type:image/jpeg\n\n";
               }
               else {
                 if($ext eq "html"){
