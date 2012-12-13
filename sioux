@@ -1,32 +1,33 @@
 #!/usr/bin/perl
+use strict;
+use warnings;
 use lib "lib";
 use POSIX ":sys_wait_h";
 use Sioux;
 
-
-
-
 @ARGV == 1 or die("Il faut un argument");
-if($ARGV[0] eq "start") {
 
-    $pid=fork();
-    if($pid==0){
-    	do "siouxstart";
-    }
-    else{
-      Sioux::enregistrerPID($pid);
-    }
-    exit 0;
+if ($ARGV[0] eq "start") {
+
+  my $pid = fork();
+
+  if ($pid == 0) {
+    do "siouxstart";
+  }
+  else {
+    Sioux::enregistrerPID($pid);
+  }
+  exit;
 }
-if($ARGV[0] eq "stop") {
-    my $pid=fork;
-    unless($pid){do "siouxstop"};
-    exit 0;
+
+if ($ARGV[0] eq "stop") {
+  do "siouxstop";
+  exit;
 }
-if($ARGV[0] eq "configure") {
-    my $pid=fork;
-    unless($pid){do "siouxconf"};
-    exit 0;
+
+if ($ARGV[0] eq "configure") {
+  do "siouxconf";
+  exit;
 }
 
 die("Cet argument n'existe pas");
