@@ -1,12 +1,12 @@
 #!/usr/bin/env perl
-#use warnings;
-#use strict;
 
-$fichpid="lib/.pid";
-open (FILE,$fichpid) or die("erreur fichier $fichpid");
-while(<FILE>){
+$fichpidpere = "lib/.pidpere";
+$fichpidfils = "lib/.pidfils";
+open(FILE,$fichpidpere) or die("erreur fichier $fichpidpere");
+while(<FILE>) {
     chomp($_);
     kill(SIGTERM,$_);
 }
 close(FILE);
-unlink $fichpid;    
+unlink $fichpidpere;
+unlink $fichpidfils;

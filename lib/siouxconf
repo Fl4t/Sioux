@@ -37,9 +37,9 @@ do {
 } until $maxclients > 0;
 
 open(OUT, ">sioux.conf");
-  print OUT "port = $port\n";
-  print OUT "rootdir = $rootdir\n";
-  print OUT "index = $index\n";
-  print OUT "cgidir = $cgidir\n";
-  print OUT "maxclients = $maxclients\n";
+print OUT "port = $port\n";
+print OUT "rootdir = $rootdir\n";
+print OUT "index = $index\n";
+print OUT "cgidir = $cgidir\n";
+print OUT "maxclients = $maxclients\n";
 close(OUT);

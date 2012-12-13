@@ -17,7 +17,7 @@ if ($ARGV[0] eq "start") {
     do "siouxstart";
   }
   else {
-    Sioux::enregistrerPID($pid);
+    Sioux::enregistrerPere($pid);
   }
   exit;
 }
