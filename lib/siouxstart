@@ -25,7 +25,7 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
 	if ($ressource eq "/"){
 	    $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
 	    print CLIENT $entete;
-	    opendir(DOSSIER,$fichier);
+	    opendir(DOSSIER,$index);
 	    @dos = readdir DOSSIER;
 	    @dos = sort @dos;
 	    foreach(@dos){
@@ -36,8 +36,17 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
 	    close(DOSSIER);
 	}
 	else {
-	    if ($ressource =~ /\.cgi$/){
-		open(SCRIPT,"perl $cgidir$ressource |");
+	    if ($ressource =~ /\.cgi/){
+		@ress = split(/%20/, $ressource);
+		$scriptCgi = "";
+		foreach(@ress){
+		    $scriptCgi = $scriptCgi." ".$_;
+		}
+		$scriptCgi=reverse($scriptCgi);
+		chop($scriptCgi);
+		$scriptCgi=reverse($scriptCgi);
+
+		open(SCRIPT,"perl $cgidir$scriptCgi |");
 		while(<SCRIPT>){
 		    print CLIENT $_;
 		}
