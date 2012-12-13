@@ -91,9 +91,10 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
         }
       }
     }
+    exit;
 
   } elsif ($pid != 0) {
-    Sioux::enregistrerPID($pid);
+    Sioux::enregistrerFils($pid);
     Sioux::tuerLesFilsZombi($pid);
   }
   close (CLIENT);
