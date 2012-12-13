@@ -35,44 +35,55 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
 	    }
 	    close(DOSSIER);
 	}
-	else{
-	    if (-d $fichier) {
-		$entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
-		print CLIENT $entete;
-		opendir(DOSSIER,$fichier);
-		@dos = readdir DOSSIER;
-		@dos = sort @dos;
-		foreach(@dos){
-		    unless ($_ eq "."){
-			print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
-		    }
+	else {
+	    if ($ressource =~ /\.cgi$/){
+		open(SCRIPT,"perl $cgidir$ressource |");
+		while(<SCRIPT>){
+		    print CLIENT $_;
 		}
-		close(DOSSIER);
+		close(SCRIPT);
 	    }
-	    else {
-		if (-e $fichier) {
-		    $ext = $fichier;
-		    $ext = ~s/(.*)\.(.*)$/$2/;
-		    if($ext eq "txt"){
-			$entete = "HTTP/1.0 200 OK\n Content-Type:text\n\n"
+	    else{
+		if (-d $fichier) {
+		    $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+		    print CLIENT $entete;
+		    opendir(DOSSIER,$fichier);
+			@dos = readdir DOSSIER;
+		    @dos = sort @dos;
+		    foreach(@dos){
+			unless ($_ eq "."){
+			    print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
+			}
 		    }
-		    else {
-			if($ext eq "jpeg"){
-			    $entete = "HTTP/1.0 200 OK\n Content-Type: image/jpeg\n\n";
+		    close(DOSSIER);
+		}
+		else {
+		    if (-e $fichier) {
+			$ext = $fichier;
+			$ext = ~s/(.*)\.(.*)$/$2/;
+			if($ext eq "txt"){
+			    $entete = "HTTP/1.0 200 OK\n Content-Type:text\n\n"
 			}
 			else {
-			    $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+			    if($ext eq "jpeg"){
+				$entete = "HTTP/1.0 200 OK\n Content-Type: image/jpeg\n\n";
+			    }
+			    else {
+				if($ext eq "html"){
+				    $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+				}
+			    }
 			}
-		    }
-		    print CLIENT $entete;
-		    open(OUT,$fichier);
-		    while(<OUT>){
-			print CLIENT $_;
+			print CLIENT $entete;
+			open(OUT,$fichier);
+			while(<OUT>){
+			    print CLIENT $_;
+			}
 		    }
 		}
 	    }
 	}
-	    
+    
     } elsif ($pid != 0) {
       Sioux::enregistrerPID($pid);
     }
