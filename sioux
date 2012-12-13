@@ -5,6 +5,8 @@ use lib "lib";
 use POSIX ":sys_wait_h";
 use Sioux;
 
+
+-e "sioux.conf" or die("Le fichier de configuration n'existe pas.");
 @ARGV == 1 or die("Il faut un argument");
 
 if ($ARGV[0] eq "start") {
