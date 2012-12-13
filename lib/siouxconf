@@ -1,27 +1,45 @@
 #!/usr/bin/env perl
-use warnings;
-use strict;
 
+my $port;
+my $rootdir;
+my $index;
+my $cgidir;
+my $maxclients;
 
-my $conf="../sioux.conf2";
-open OUT, ">$conf";
+do {
+  print "port ? : ";
+  $port = <STDIN>;
+  chomp($port);
+} until $port > 1024 && $port < 40_0000;
 
-print "port?";
-my $in=<STDIN>;
-print (OUT "port = $in");
-print "rootdir?";
-$in=<STDIN>;
-print (OUT "rootdir = $in");
-print "index?";
-$in=<STDIN>;
-print (OUT "index = $in");
-print "cgidir?";
-$in=<STDIN>;
-print (OUT "cgidir = $in");
-print "maxclients?";
-$in=<STDIN>;
-print (OUT "maxclients = $in");
+do {
+  print "rootdir? : ";
+  $rootdir = <STDIN>;
+  chomp($rootdir);
+} until -d $rootdir;
 
-close OUT;
+do {
+  print "index? : ";
+  $index = <STDIN>;
+  chomp($index);
+} until $index =~ /\.html?$/;
 
-do "siouxstart";
+do {
+  print "cgidir? : ";
+  $cgidir = <STDIN>;
+  chomp($cgidir);
+} until $cgidir ne "" && $cgidir ne $rootdir;
+
+do {
+  print "maxclients? : ";
+  $maxclients = <STDIN>;
+  chomp($maxclients);
+} until $maxclients > 0;
+
+open(OUT, ">sioux.conf");
+  print OUT "port = $port\n";
+  print OUT "rootdir = $rootdir\n";
+  print OUT "index = $index\n";
+  print OUT "cgidir = $cgidir\n";
+  print OUT "maxclients = $maxclients\n";
+close(OUT);
