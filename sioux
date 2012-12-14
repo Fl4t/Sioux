@@ -10,10 +10,12 @@ use Sioux;
 
 if ($ARGV[0] eq "start") {
 
+  die("Le fichier de configuration n'existe pas.\n") unless -e "sioux.conf";
+  die("Le serveur est déjà lancé.\n") if -e "lib/.pidpere";
+
   my $pid = fork();
 
   if ($pid == 0) {
-    -e "sioux.conf" or die("Le fichier de configuration n'existe pas.\n");
     do "siouxstart";
   }
   else {

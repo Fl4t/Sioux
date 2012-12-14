@@ -2,12 +2,10 @@
 use warnings;
 
 $fichpidpere = "lib/.pidpere";
-$fichpidfils = "lib/.pidfils";
 open(FILE,$fichpidpere) or die("erreur fichier $fichpidpere");
 while(<FILE>) {
-    chomp($_);
-    kill(SIGTERM,$_);
+  chomp($_);
+  kill(SIGTERM,$_);
 }
 close(FILE);
 unlink $fichpidpere;
-unlink $fichpidfils;

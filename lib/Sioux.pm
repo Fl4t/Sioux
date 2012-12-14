@@ -1,25 +1,7 @@
 #!/usr/bin/env perl
 use warnings;
-use POSIX ":sys_wait_h";
 
 package Sioux;
-
-sub tuerLesFilsZombi {
-  open(FICHIERPID, "lib/.pidfils");
-  while (<FICHIERPID>) {
-    $fils = waitpid($_, WNOHANG);
-    if ($fils == 0) {
-      $filspasmort[$i++] = $_;
-    }
-  }
-  close(FICHIERPID);
-
-  open(FICHIERPID, ">lib/.pidfils");
-  while (@filspasmort) {
-    print FICHIERPID $_;
-  }
-  close(FICHIERPID);
-}
 
 sub enregistrerPere {
   open(FICHIERPID, ">lib/.pidpere");
@@ -27,13 +9,8 @@ sub enregistrerPere {
   close(FICHIERPID);
 }
 
-sub enregistrerFils {
-  open(FICHIERPID, ">>lib/.pidfils");
-  print FICHIERPID "$_[0]\n";
-  close(FICHIERPID);
-}
-
 sub chargerLaConf {
+  my $i;
   open(CONF, "sioux.conf");
   while (<CONF>) {
     chomp;

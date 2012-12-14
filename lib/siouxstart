@@ -1,7 +1,10 @@
 #!/usr/bin/env perl
 use Socket;
 use IO::Handle;
+use POSIX ":sys_wait_h";
 use warnings;
+$cpt = 0;
+$flag = 0;
 
 ($port, $rootdir, $index, $cgidir, $maxclients) = Sioux::chargerLaConf();
 
@@ -11,103 +14,137 @@ $mon_adresse = sockaddr_in ("$port", INADDR_ANY);
 bind(SERVEUR, $mon_adresse) || die ("bind");
 listen (SERVEUR, SOMAXCONN) || die ("listen");
 
-while (accept (CLIENT, SERVEUR) || die ("accept")) {
-  $pid = fork;
-  if ($pid == 0) {
-    $req=<CLIENT>;
-    chomp($req);
-    ($methode,$ressource,$protocole)=split(/ /, $req);
-    chop($protocole);
-    print CLIENT "error GET\n" unless $methode eq "GET";
-    print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
+$nbClients = 0;
 
-    $fichier = $rootdir.$ressource;
-    if ($ressource =~ /\/$/){
-      $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
-      print CLIENT $entete;
-      if(-e $rootdir."/".$index){
-	  $pagedepart = $rootdir."/".$index;
-	  open(OUT,$pagedepart);
-	  while(<OUT>){
-	      print CLIENT $_;
-	  }
-	  close(OUT);
-      }
-      else{
-	  $pagedepart = $fichier;
-	  opendir(DOSSIER,$pagedepart);
-	  @dos = readdir DOSSIER;
-	  @dos = sort @dos;
-	  foreach(@dos){
-	      unless ($_ eq "." || $_ eq ".."){
-		  print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
-	      }
-	  }
+$SIG{CHLD} = 'deces';
+
+sub deces {
+  $flag = 1;
+}
+
+
+while(1) {
+  if ($flag == 1) {
+    $flag = 0;
+
+    $cpt = 0;
+    while($cpt < $nbClients) {
+      if(waitpid(-1, WNOHANG)>0) {
+        $nbClients--;
+      } else {
+        $cpt++;
       }
     }
-    else {
-      if ($ressource =~ /\.cgi/){
-        @ress = split(/%20/, $ressource);
-        $scriptCgi = "";
-        foreach(@ress){
-          $scriptCgi = $scriptCgi." ".$_;
-        }
-        $scriptCgi=reverse($scriptCgi);
-        chop($scriptCgi);
-        $scriptCgi=reverse($scriptCgi);
+  }
+  while (accept (CLIENT, SERVEUR)) {
 
-        open(SCRIPT,"perl $cgidir$scriptCgi |");
-        while(<SCRIPT>){
-          print CLIENT $_;
-        }
-        close(SCRIPT);
-      }
-      else{
-        if (-d $fichier) {
+
+    if($nbClients < $maxclients) {
+      $nbClients++;
+
+      $pid = fork;
+      if ($pid == 0) {
+        $req=<CLIENT>;#{{{
+        chomp($req);
+        ($methode,$ressource,$protocole)=split(/ /, $req);
+        chop($protocole);
+        print CLIENT "error GET\n" unless $methode eq "GET";
+        print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
+
+        $fichier = $rootdir.$ressource;
+        if ($ressource =~ /\/$/){#{{{
           $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
           print CLIENT $entete;
-          opendir(DOSSIER,$fichier);
-          @dos = readdir DOSSIER;
-          @dos = sort @dos;
-          foreach(@dos){
-            unless ($_ eq "."){
-              print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
-            }
-          }
-          close(DOSSIER);
-        }
-        else {
-          if (-e $fichier) {
-            $ext = $fichier;
-            $ext =~ s/(.*)\.(.*)$/$2/;
-            if($ext eq "txt"){
-              $entete = "HTTP/1.0 200 OK\n Content-Type:text\n\n"
-            }
-            else {
-              if($ext eq "jpeg"){
-                $entete = "HTTP/1.0 200 OK\n Content-Type:image/jpeg\n\n";
-              }
-              else {
-                if($ext eq "html"){
-                  $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
-                }
-              }
-            }
-            print CLIENT $entete;
-            open(OUT,$fichier);
+          if(-e $rootdir."/".$index){
+            $pagedepart = $rootdir."/".$index;
+            open(OUT,$pagedepart);
             while(<OUT>){
               print CLIENT $_;
             }
+            close(OUT);
+          }
+          else{
+            $pagedepart = $fichier;
+            opendir(DOSSIER,$pagedepart);
+            @dos = readdir DOSSIER;
+            @dos = sort @dos;
+            foreach(@dos){
+              unless ($_ eq "." || $_ eq ".."){
+                print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
+              }
+            }
           }
         }
-      }
-    }
-    exit;
+        else {
+          if ($ressource =~ /\.cgi/){
+            @ress = split(/%20/, $ressource);
+            $scriptCgi = "";
+            foreach(@ress){
+              $scriptCgi = $scriptCgi." ".$_;
+            }
+            $scriptCgi=reverse($scriptCgi);
+            chop($scriptCgi);
+            $scriptCgi=reverse($scriptCgi);
 
-  } elsif ($pid != 0) {
-    Sioux::enregistrerFils($pid);
-    Sioux::tuerLesFilsZombi($pid);
+            open(SCRIPT,"perl $cgidir$scriptCgi |");
+            while(<SCRIPT>){
+              print CLIENT $_;
+            }
+            close(SCRIPT);
+          }
+          else{
+            if (-d $fichier) {
+              $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+              print CLIENT $entete;
+              opendir(DOSSIER,$fichier);
+              @dos = readdir DOSSIER;
+              @dos = sort @dos;
+              foreach(@dos){
+                unless ($_ eq "."){
+                  print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
+                }
+              }
+              close(DOSSIER);
+            }
+            else {
+              if (-e $fichier) {
+                $ext = $fichier;
+                $ext =~ s/(.*)\.(.*)$/$2/;
+                if($ext eq "txt"){
+                  $entete = "HTTP/1.0 200 OK\n Content-Type:text\n\n"
+                }
+                else {
+                  if($ext eq "jpeg"){
+                    $entete = "HTTP/1.0 200 OK\n Content-Type:image/jpeg\n\n";
+                  }
+                  else {
+                    if($ext eq "html"){
+                      $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+                    }
+                  }
+                }
+                print CLIENT $entete;
+                open(OUT,$fichier);
+                while(<OUT>){
+                  print CLIENT $_;
+                }
+              }
+            }
+          }
+        }#}}}#}}}
+        close (CLIENT);
+        exit;
+
+      } elsif ($pid != 0) {
+        close (CLIENT);
+      }
+    } else {
+      # maxclients atteint
+      $entete = "HTTP/1.0 503 Service Unavailable\n Content-Type:text/html\n\n";
+      print CLIENT $entete;
+      print CLIENT "<html><head><title>403 Forbidden</title></head><body><h1>403 Vous n'avez pas les droits</h1><br /><hr />Serveur Sioux</body></html>";
+      close(CLIENT);
+    }
   }
-  close (CLIENT);
 }
-close (SERVEUR);
+close(SERVEUR);
