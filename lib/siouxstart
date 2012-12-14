@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 use Socket;
-use IO::Handle;
+use IO::Handle;x
+use Warning;
 
 ($port, $rootdir, $index, $cgidir, $maxclients) = Sioux::chargerLaConf();
 
@@ -34,7 +35,7 @@ while (accept (CLIENT, SERVEUR) || die ("accept")) {
       }
       else{
 	  $pagedepart = $fichier;
-	  open(DOSSIER,$pagedepart);
+	  opendir(DOSSIER,$pagedepart);
 	  @dos = readdir DOSSIER;
 	  @dos = sort @dos;
 	  foreach(@dos){

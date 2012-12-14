@@ -1,5 +1,8 @@
 #!/usr/bin/env perl
 
+
+use Warning;
+
 my $port;
 my $rootdir;
 my $index;

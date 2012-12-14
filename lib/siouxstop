@@ -1,5 +1,7 @@
 #!/usr/bin/env perl
 
+use Warning;
+
 $fichpidpere = "lib/.pidpere";
 $fichpidfils = "lib/.pidfils";
 open(FILE,$fichpidpere) or die("erreur fichier $fichpidpere");
