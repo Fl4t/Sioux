@@ -1,4 +1,6 @@
 #!/usr/bin/env perl
+use warnings;
+use POSIX ":sys_wait_h";
 
 package Sioux;
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env perl
-
-use Warning;
+use warnings;
 
 $fichpidpere = "lib/.pidpere";
 $fichpidfils = "lib/.pidfils";

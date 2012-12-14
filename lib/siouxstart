@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use Socket;
-use IO::Handle;x
-use Warning;
+use IO::Handle;
+use warnings;
 
 ($port, $rootdir, $index, $cgidir, $maxclients) = Sioux::chargerLaConf();
 
