@@ -44,7 +44,7 @@ while(1) {
 
       $pid = fork;
       if ($pid == 0) {
-        $req=<CLIENT>;#{{{
+        $req=<CLIENT>;
         chomp($req);
         ($methode,$ressource,$protocole)=split(/ /, $req);
         chop($protocole);
@@ -52,7 +52,7 @@ while(1) {
         print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
 
         $fichier = $rootdir.$ressource;
-        if ($ressource =~ /\/$/){#{{{
+        if ($ressource =~ /\/$/){
           $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
           print CLIENT $entete;
           if(-e $rootdir."/".$index){
@@ -131,7 +131,7 @@ while(1) {
               }
             }
           }
-        }#}}}#}}}
+        }
         close (CLIENT);
         exit;
 
