@@ -10,7 +10,6 @@ use POSIX ":sys_wait_h";
 
 my $cpt = 0;
 my $flag = 0;
-my $entete;
 
 (my $port, my $rootdir, my $index, my $cgidir, my $maxclients) = Sioux::chargerLaConf();
 
@@ -72,8 +71,7 @@ while(1) {
           my @dos;
           my $fichier = $rootdir.$ressource;
           if ($ressource =~ /\/$/){
-            $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
-            print CLIENT $entete;
+            print CLIENT Sioux::enTete(Sioux::code('200'), 'text/html');
             if(-e $rootdir."/".$index){
               $pagedepart = $rootdir."/".$index;
               open(OUT,$pagedepart);
@@ -110,8 +108,7 @@ while(1) {
             }
             else{
               if (-d $fichier) {
-                $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
-                print CLIENT $entete;
+                print CLIENT Sioux::enTete(Sioux::code('200'), 'text/html');
                 opendir(DOSSIER,$fichier);
                 @dos = readdir DOSSIER;
                 @dos = sort @dos;
@@ -126,20 +123,9 @@ while(1) {
                 if (-e $fichier) {
                   my $ext = $fichier;
                   $ext =~ s/(.*)\.(.*)$/$2/;
-                  if($ext eq "txt"){
-                    $entete = "HTTP/1.0 200 OK\n Content-Type:text\n\n"
-                  }
-                  else {
-                    if($ext eq "jpeg"){
-                      $entete = "HTTP/1.0 200 OK\n Content-Type:image/jpeg\n\n";
-                    }
-                    else {
-                      if($ext eq "html"){
-                        $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
-                      }
-                    }
-                  }
-                  print CLIENT $entete;
+                  print CLIENT Sioux::enTete(Sioux::code('200'), 'text') if $ext eq "txt";
+                  print CLIENT Sioux::enTete(Sioux::code('200'), 'image/jpeg') if $ext eq "jpeg";
+                  print CLIENT Sioux::enTete(Sioux::code('200'), 'text/html') if $ext eq "html";
                   open(OUT,$fichier);
                   while(<OUT>){
                     print CLIENT $_;
@@ -157,9 +143,8 @@ while(1) {
       }
     } else {
       # maxclients atteint
-      $entete = "HTTP/1.0 503 Service Unavailable\n Content-Type:text/html\n\n";
-      print CLIENT $entete;
-      print CLIENT "<html><head><title>403 Forbidden</title></head><body><h1>403 Vous n'avez pas les droits</h1><br /><hr />Serveur Sioux</body></html>";
+      print CLIENT Sioux::enTete(Sioux::code('403'), 'text/html');
+      print CLIENT Sioux::contentPage('403');
       close(CLIENT);
     }
   }
