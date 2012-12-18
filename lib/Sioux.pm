@@ -4,6 +4,14 @@ use warnings; # warnings suplémentaires
 
 package Sioux;
 
+sub erreur {
+  my @httpErrorCodes;
+  return '200 OK' if $_[0] eq '200';
+  return '403 Forbidden' if $_[0] eq '403';
+  return '404 Not Found' if $_[0] eq '404';
+  return '505 HTTP Version Not Supported' if $_[0] eq '505';
+}
+
 sub contentPage {
   my $debut = '<html><head><title>';
   my $milieu = '</title></head><body><h1>';
