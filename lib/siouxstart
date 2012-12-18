@@ -60,7 +60,8 @@ while(1) {
 	    chdir(dirname($rootdir.$ressource));
 	}
 	unless( getcwd()=~/$rootdir/){
-	    print CLIENT "erreur 400 bad request";
+	    print CLIENT "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+	    print CLIENT "<html><head><title>400 Bad request</title></head><body><h1>La syntaxe de la requête est erronée</h1><br /><hr />Serveur Sioux</body></html>";
 	}
 	else{
 	    $fichier = $rootdir.$ressource;
