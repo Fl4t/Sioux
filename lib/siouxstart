@@ -1,22 +1,26 @@
 #!/usr/bin/env perl
+use strict; # norme d'évaluation des termes plus strict
+use warnings; # warnings suplémentaires
+
 use Socket;
 use File::Basename;
 use Cwd;
 use IO::Handle;
 use POSIX ":sys_wait_h";
-use warnings;
-$cpt = 0;
-$flag = 0;
 
-($port, $rootdir, $index, $cgidir, $maxclients) = Sioux::chargerLaConf();
+my $cpt = 0;
+my $flag = 0;
+my $entete;
+
+(my $port, my $rootdir, my $index, my $cgidir, my $maxclients) = Sioux::chargerLaConf();
 
 socket (SERVEUR, PF_INET, SOCK_STREAM, getprotobyname('tcp'));
 setsockopt (SERVEUR, SOL_SOCKET, SO_REUSEADDR, 1);
-$mon_adresse = sockaddr_in ("$port", INADDR_ANY);
+my $mon_adresse = sockaddr_in ("$port", INADDR_ANY);
 bind(SERVEUR, $mon_adresse) || die ("bind");
 listen (SERVEUR, SOMAXCONN) || die ("listen");
 
-$nbClients = 0;
+my $nbClients = 0;
 
 $SIG{CHLD} = 'deces';
 
@@ -44,105 +48,107 @@ while(1) {
     if($nbClients < $maxclients) {
       $nbClients++;
 
-      $pid = fork;
+      my $pid = fork;
       if ($pid == 0) {
-        $req=<CLIENT>;
+        my $req=<CLIENT>;
         chomp($req);
-        ($methode,$ressource,$protocole)=split(/ /, $req);
+        (my $methode, my $ressource, my $protocole)=split(/ /, $req);
         chop($protocole);
         print CLIENT "error GET\n" unless $methode eq "GET";
         print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
-	
-	if(-d $rootdir.$ressource){
-	    chdir($rootdir.$ressource);
-	}
-	else{
-	    chdir(dirname($rootdir.$ressource));
-	}
-	unless( getcwd()=~/$rootdir/){
-	    print CLIENT "HTTP/1.0 200 OK\n Content-Type:html\n\n";
-	    print CLIENT "<html><head><title>400 Bad request</title></head><body><h1>La syntaxe de la requête est erronée</h1><br /><hr />Serveur Sioux</body></html>";
-	}
-	else{
-	    $fichier = $rootdir.$ressource;
-	    if ($ressource =~ /\/$/){
-		$entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
-		print CLIENT $entete;
-		if(-e $rootdir."/".$index){
-		    $pagedepart = $rootdir."/".$index;
-		    open(OUT,$pagedepart);
-		    while(<OUT>){
-			print CLIENT $_;
-		    }
-		    close(OUT);
-		}
-		else{
-		    $pagedepart = $fichier;
-		    opendir(DOSSIER,$pagedepart);
-		    @dos = readdir DOSSIER;
-		    @dos = sort @dos;
-		    foreach(@dos){
-			unless ($_ eq "." || $_ eq ".."){
-			    print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
-			}
-		    }
-		}
-	    }
-	    else {
-		if ($ressource =~ /\.cgi/){
-		    @ress = split(/\?/, $ressource);
-		    @tout = split("&",$ress[1]);
-		    
-		    $scriptCgi=$ress[0];
-		    $scriptCgi=~s~ (.*)~$1~;
-		    
-            open(SCRIPT,"perl $cgidir$scriptCgi @tout |");
-		    while(<SCRIPT>){
-			print CLIENT $_;
-		    }
-		    close(SCRIPT);
-		}
-		else{
-		    if (-d $fichier) {
-			$entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
-			print CLIENT $entete;
-			opendir(DOSSIER,$fichier);
-			@dos = readdir DOSSIER;
-			@dos = sort @dos;
-			foreach(@dos){
-			    unless ($_ eq "."){
-				print CLIENT '<a href="'.$ressource."/".$_.'">'.$_.'</a><br />';
-			    }
-			}
-			close(DOSSIER);
-		    }
-		    else {
-			if (-e $fichier) {
-			    $ext = $fichier;
-			    $ext =~ s/(.*)\.(.*)$/$2/;
-			    if($ext eq "txt"){
-				$entete = "HTTP/1.0 200 OK\n Content-Type:text\n\n"
-			    }
-			    else {
-				if($ext eq "jpeg"){
-				    $entete = "HTTP/1.0 200 OK\n Content-Type:image/jpeg\n\n";
-				}
-				else {
-				    if($ext eq "html"){
-					$entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
-				    }
-				}
-			    }
-			    print CLIENT $entete;
-			    open(OUT,$fichier);
-			    while(<OUT>){
-				print CLIENT $_;
-			    }
-			}
-		    }
-		}
-	    }
-	}
+
+        if(-d $rootdir.$ressource){
+          chdir($rootdir.$ressource);
+        }
+        else{
+          chdir(dirname($rootdir.$ressource));
+        }
+        unless( getcwd()=~/$rootdir/){
+          print CLIENT "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+          print CLIENT "<html><head><title>400 Bad request</title></head><body><h1>La syntaxe de la requête est erronée</h1><br /><hr />Serveur Sioux</body></html>";
+        }
+        else{
+          my $pagedepart;
+          my @dos;
+          my $fichier = $rootdir.$ressource;
+          if ($ressource =~ /\/$/){
+            $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+            print CLIENT $entete;
+            if(-e $rootdir."/".$index){
+              $pagedepart = $rootdir."/".$index;
+              open(OUT,$pagedepart);
+              while(<OUT>){
+                print CLIENT $_;
+              }
+              close(OUT);
+            }
+            else{
+              $pagedepart = $fichier;
+              opendir(DOSSIER,$pagedepart);
+              @dos = readdir DOSSIER;
+              @dos = sort @dos;
+              foreach(@dos){
+                unless ($_ eq "." || $_ eq ".."){
+                  print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
+                }
+              }
+            }
+          }
+          else {
+            if ($ressource =~ /\.cgi/){
+              my @ress = split(/\?/, $ressource);
+              my @tout = split("&",$ress[1]);
+
+              my $scriptCgi=$ress[0];
+              $scriptCgi=~s~ (.*)~$1~;
+
+              open(SCRIPT,"perl $cgidir$scriptCgi @tout |");
+              while(<SCRIPT>){
+                print CLIENT $_;
+              }
+              close(SCRIPT);
+            }
+            else{
+              if (-d $fichier) {
+                $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+                print CLIENT $entete;
+                opendir(DOSSIER,$fichier);
+                @dos = readdir DOSSIER;
+                @dos = sort @dos;
+                foreach(@dos){
+                  unless ($_ eq "."){
+                    print CLIENT '<a href="'.$ressource."/".$_.'">'.$_.'</a><br />';
+                  }
+                }
+                close(DOSSIER);
+              }
+              else {
+                if (-e $fichier) {
+                  my $ext = $fichier;
+                  $ext =~ s/(.*)\.(.*)$/$2/;
+                  if($ext eq "txt"){
+                    $entete = "HTTP/1.0 200 OK\n Content-Type:text\n\n"
+                  }
+                  else {
+                    if($ext eq "jpeg"){
+                      $entete = "HTTP/1.0 200 OK\n Content-Type:image/jpeg\n\n";
+                    }
+                    else {
+                      if($ext eq "html"){
+                        $entete = "HTTP/1.0 200 OK\n Content-Type:html\n\n";
+                      }
+                    }
+                  }
+                  print CLIENT $entete;
+                  open(OUT,$fichier);
+                  while(<OUT>){
+                    print CLIENT $_;
+                  }
+                }
+              }
+            }
+          }
+        }
         close (CLIENT);
         exit;
 

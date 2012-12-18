@@ -1,10 +1,11 @@
 #!/usr/bin/env perl
-use warnings;
+use strict; # norme d'évaluation des termes plus strict
+use warnings; # warnings suplémentaires
 
 package Sioux;
 
 sub enTete {
-  $header = "HTTP/1.0 $_[1]\n";
+  my $header = "HTTP/1.0 $_[1]\n";
   $header .= "Content-Type: $_[0];";
   $header .= " charset=utf-8\n\n";
   return $header;
@@ -18,6 +19,8 @@ sub enregistrerPere {
 
 sub chargerLaConf {
   my $i;
+  my @ret;
+  my @conf;
   open(CONF, "sioux.conf");
   while (<CONF>) {
     chomp;

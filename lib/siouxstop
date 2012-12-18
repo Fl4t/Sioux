@@ -1,11 +1,13 @@
 #!/usr/bin/env perl
-use warnings;
+use strict; # norme d'évaluation des termes plus strict
+use warnings; # warnings suplémentaires
 
-$fichpidpere = "lib/.pidpere";
+my $fichpidpere = "lib/.pidpere";
 open(FILE,$fichpidpere) or die("erreur fichier $fichpidpere");
 while(<FILE>) {
+  no strict;
   chomp($_);
-  kill(SIGTERM,$_);
+  kill(SIGTERM, $_);
 }
 close(FILE);
 unlink $fichpidpere;

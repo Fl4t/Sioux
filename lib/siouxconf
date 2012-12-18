@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
-use warnings;
+use strict; # norme d'évaluation des termes plus strict
+use warnings; # warnings suplémentaires
 
 my $port;
 my $rootdir;
