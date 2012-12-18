@@ -27,7 +27,6 @@ sub deces {
   $flag = 1;
 }
 
-
 while(1) {
   if ($flag == 1) {
     $flag = 0;
@@ -43,7 +42,6 @@ while(1) {
   }
   while (accept (CLIENT, SERVEUR)) {
 
-
     if($nbClients < $maxclients) {
       $nbClients++;
 
@@ -53,47 +51,49 @@ while(1) {
         chomp($req);
         (my $methode, my $ressource, my $protocole)=split(/ /, $req);
         chop($protocole);
-        print CLIENT "error GET\n" unless $methode eq "GET";
-        print CLIENT "error HTTP\n" unless $protocole eq "HTTP/1.0";
 
-        if(-d $rootdir.$ressource){
-          chdir($rootdir.$ressource);
-        }
-        else{
-          chdir(dirname($rootdir.$ressource));
-        }
-        unless( getcwd()=~/$rootdir/){
+        unless ($methode eq "GET") {
           print CLIENT Sioux::enTete(Sioux::code('400'), 'text/html');
           print CLIENT Sioux::contentPage('400');
         }
-        else{
+
+        unless ($protocole eq "HTTP/1.0") {
+          print CLIENT Sioux::enTete(Sioux::code('505'), 'text/html');
+          print CLIENT Sioux::contentPage('505');
+        }
+
+        if(-d $rootdir.$ressource) {
+          chdir($rootdir.$ressource);
+        } else {
+          chdir(dirname($rootdir.$ressource));
+        }
+
+        unless (getcwd()=~/$rootdir/) {
+          print CLIENT Sioux::enTete(Sioux::code('400'), 'text/html');
+          print CLIENT Sioux::contentPage('400');
+        } else {
           my $pagedepart;
           my @dos;
           my $fichier = $rootdir.$ressource;
-          if ($ressource =~ /\/$/){
+          if ($ressource =~ /\/$/) {
             print CLIENT Sioux::enTete(Sioux::code('200'), 'text/html');
-            if(-e $rootdir."/".$index){
+            if(-e $rootdir."/".$index) {
               $pagedepart = $rootdir."/".$index;
               open(OUT,$pagedepart);
-              while(<OUT>){
+              while(<OUT>) {
                 print CLIENT $_;
               }
               close(OUT);
-            }
-            else{
+            } else {
               $pagedepart = $fichier;
               opendir(DOSSIER,$pagedepart);
               @dos = readdir DOSSIER;
-              @dos = sort @dos;
-              foreach(@dos){
-                unless ($_ eq "." || $_ eq ".."){
-                  print CLIENT '<a href="'.$_.'">'.$_.'</a><br />';
-                }
+              foreach(sort @dos){
+                print CLIENT '<a href="'.$_.'">'.$_.'</a><br />' unless $_ eq "." || $_ eq "..";
               }
             }
-          }
-          else {
-            if ($ressource =~ /\.cgi/){
+          } else {
+            if ($ressource =~ /\.cgi/) {
               my @ress = split(/\?/, $ressource);
               my @tout = split("&",$ress[1]);
 
@@ -105,32 +105,28 @@ while(1) {
                 print CLIENT $_;
               }
               close(SCRIPT);
-            }
-            else{
+            } else {
               if (-d $fichier) {
                 print CLIENT Sioux::enTete(Sioux::code('200'), 'text/html');
                 opendir(DOSSIER,$fichier);
                 @dos = readdir DOSSIER;
-                @dos = sort @dos;
-                foreach(@dos){
-                  unless ($_ eq "."){
-                    print CLIENT '<a href="'.$ressource."/".$_.'">'.$_.'</a><br />';
-                  }
+                foreach(sort @dos){
+                  print CLIENT '<a href="'.$ressource."/".$_.'">'.$_.'</a><br />' unless $_ eq ".";
                 }
                 close(DOSSIER);
-              }
-              else {
-                if (-e $fichier) {
-                  my $ext = $fichier;
-                  $ext =~ s/(.*)\.(.*)$/$2/;
-                  print CLIENT Sioux::enTete(Sioux::code('200'), 'text') if $ext eq "txt";
-                  print CLIENT Sioux::enTete(Sioux::code('200'), 'image/jpeg') if $ext eq "jpeg";
-                  print CLIENT Sioux::enTete(Sioux::code('200'), 'text/html') if $ext eq "html";
-                  open(OUT,$fichier);
-                  while(<OUT>){
-                    print CLIENT $_;
-                  }
+              } elsif (-e $fichier) {
+                my $ext = $fichier;
+                $ext =~ s/(.*)\.(.*)$/$2/;
+                print CLIENT Sioux::enTete(Sioux::code('200'), 'text') if $ext eq "txt";
+                print CLIENT Sioux::enTete(Sioux::code('200'), 'image/jpeg') if $ext eq "jpeg";
+                print CLIENT Sioux::enTete(Sioux::code('200'), 'text/html') if $ext eq "html";
+                open(OUT,$fichier);
+                while(<OUT>){
+                  print CLIENT $_;
                 }
+              } else {
+                print CLIENT Sioux::enTete(Sioux::code('404'), 'text/html');
+                print CLIENT Sioux::contentPage('404');
               }
             }
           }
