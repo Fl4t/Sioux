@@ -77,16 +77,13 @@ while(1) {
         }
         else {
           if ($ressource =~ /\.cgi/){
-            @ress = split(/%20/, $ressource);
-            $scriptCgi = "";
-            foreach(@ress){
-              $scriptCgi = $scriptCgi." ".$_;
-            }
-            $scriptCgi=reverse($scriptCgi);
-            chop($scriptCgi);
-            $scriptCgi=reverse($scriptCgi);
-
-            open(SCRIPT,"perl $cgidir$scriptCgi |");
+	    @ress = split(/\?/, $ressource);
+	    @tout = split("&",$ress[1]);
+	    
+	    $scriptCgi=$ress[0];
+	    $scriptCgi=~s~ (.*)~$1~;
+          
+            open(SCRIPT,"perl $cgidir$scriptCgi @tout |");
             while(<SCRIPT>){
               print CLIENT $_;
             }
