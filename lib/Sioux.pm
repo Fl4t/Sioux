@@ -10,6 +10,7 @@ sub code {
   return '403 Forbidden' if $_[0] eq '403';
   return '404 Not Found' if $_[0] eq '404';
   return '505 HTTP Version Not Supported' if $_[0] eq '505';
+  return '400 Bad request' if $_[0] eq '400';
 }
 
 sub contentPage {
@@ -20,6 +21,8 @@ sub contentPage {
   return $debut.'200 OK'.$milieu.'The request is OK'.$fin if $_[0] eq '200';
   return $debut.'403 Forbidden'.$milieu.'Access is forbidden to the requested page'.$fin if $_[0] eq '403';
   return $debut.'404 Not Found'.$milieu.'The server can not find the requested page'.$fin if $_[0] eq '404';
+  return $debut.'404 Not Found'.$milieu.'The server can not find the requested page'.$fin if $_[0] eq '404';
+  return $debut.'400 Bad Request'.$milieu.'The server did not understand the request'.$fin if $_[0] eq '400';
   return $debut.'505 HTTP Version Not Supported'.$milieu.'The server does not support the http protocol'.$fin if $_[0] eq '503';
 }
 
