@@ -117,7 +117,7 @@ while(1) {
               } elsif (-e $fichier) {
                 my $ext = $fichier;
                 $ext =~ s/(.*)\.(.*)$/$2/;
-                print CLIENT Sioux::enTete(Sioux::code('200'), 'text') if $ext eq "txt";
+                print CLIENT Sioux::enTete(Sioux::code('200'), 'text/plain') if $ext eq "txt";
                 print CLIENT Sioux::enTete(Sioux::code('200'), 'image/jpeg') if $ext eq "jpeg";
                 print CLIENT Sioux::enTete(Sioux::code('200'), 'text/html') if $ext eq "html";
                 open(OUT,$fichier);
