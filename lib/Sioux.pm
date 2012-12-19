@@ -18,7 +18,7 @@ sub contentPage {
   my $fin = '</h1></body></html>';
   return $debut.code('403').$milieu.'Access is forbidden to the requested page'.$fin if $_[0] eq '403';
   return $debut.code('404').$milieu.'The server can not find the requested page'.$fin if $_[0] eq '404';
-  return $debut.code('505').$milieu.'The server does not support the http protocol'.$fin if $_[0] eq '503';
+  return $debut.code('505').$milieu.'The server does not support the http protocol'.$fin if $_[0] eq '505';
   return $debut.code('400').$milieu.'The server did not understand the request'.$fin if $_[0] eq '400';
 }
 

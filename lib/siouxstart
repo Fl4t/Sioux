@@ -55,11 +55,13 @@ while(1) {
         unless ($methode eq "GET") {
           print CLIENT Sioux::enTete(Sioux::code('400'), 'text/html');
           print CLIENT Sioux::contentPage('400');
+          exit;
         }
 
         unless ($protocole eq "HTTP/1.0") {
           print CLIENT Sioux::enTete(Sioux::code('505'), 'text/html');
           print CLIENT Sioux::contentPage('505');
+          exit;
         }
 
         if(-d $rootdir.$ressource) {
